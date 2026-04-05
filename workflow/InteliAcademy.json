@@ -1,0 +1,244 @@
+{
+  "name": "InteliAcademy",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        0
+      ],
+      "id": "918a3437-6b8c-4fe9-9ea0-789a628f3c4c",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "c8fe3baf-6b29-49d0-ba42-b0e97a458890",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiOutput = items[0].json.output || items[0].json.text || items[0].json.message?.content;\nconst dataAtual = new Date().toLocaleDateString('pt-BR');\n\nfunction formatarNewsletter(texto) {\n    if (!texto) return \"Gerando inteligência corporativa...\";\n\n    // Limpeza de caracteres especiais e numerações\n    let limpo = texto.replace(/[*#]/g, '')\n                     .replace(/^[ \\t]*[-•][ \\t]*/gm, '')\n                     .replace(/^[ \\t]*\\d+[.)][ \\t]*/gm, '');\n\n    return limpo\n        // Início do Card da Notícia (Arredondado)\n        .replace(/CATEGORIA: (.*)/gi, '<div style=\"background: #0a0a0a; border: 1px solid #1a1a1a; padding: 25px; border-radius: 20px; margin-bottom: 30px;\">' +\n            '<div style=\"display: inline-block; background: #2a1b3d; color: #bb86fc; padding: 5px 15px; border-radius: 50px; font-size: 10px; font-weight: bold; letter-spacing: 1px; border: 1px solid #44315d; text-transform: uppercase; margin-bottom: 15px;\">$1</div>')\n        \n        // Título\n        .replace(/TITULO: (.*)/gi, '<h2 style=\"color: #ffffff; font-size: 20px; margin: 0 0 12px 0; line-height: 1.3; font-weight: 700;\">$1</h2>')\n        \n        // Contexto (Justificado e Branco)\n        .replace(/CONTEXTO: (.*)/gi, '<p style=\"text-align: justify; color: #ffffff; font-size: 14px; margin-bottom: 12px; line-height: 1.6; font-weight: 300;\">$1</p>')\n        \n        // Impacto (Branco e Negrito)\n        .replace(/IMPACTO: (.*)/gi, '<p style=\"text-align: justify; color: #ffffff; font-size: 14px; margin-bottom: 20px; line-height: 1.6;\"><strong>ANÁLISE:</strong> $1</p>')\n        \n        // Botão de Fonte (Arredondado)\n        .replace(/FONTE: (.*)/gi, '<a href=\"$1\" style=\"color: #ff79c6; text-decoration: none; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid #ff79c6; padding: 8px 18px; border-radius: 50px; display: inline-block;\">Ver Notícia</a></div>')\n        \n        // Seção de Tendências (Card com borda Roxa Arredondada)\n        .replace(/ANALISE DE TENDENCIAS: (.*)/gi, '<div style=\"background: #120a1f; padding: 30px; border-radius: 25px; border: 1px solid #6200ee; margin-top: 40px;\"><h3 style=\"color: #bb86fc; margin: 0 0 20px 0; font-size: 18px; letter-spacing: 2px; text-align: center; text-transform: uppercase;\">Tendências & Padrões</h3><p style=\"text-align: justify; color: #ffffff; font-size: 14px; line-height: 1.8; margin: 0;\">$1</p>')\n        \n        // Insight Academy (Borda arredondada interna)\n        .replace(/INSIGHT ACADEMY: (.*)/gi, '<div style=\"margin-top: 25px; padding: 20px; border-radius: 15px; border-left: 5px solid #bb86fc; background: #1a1a1a;\"><p style=\"text-align: justify; color: #ffffff; font-size: 13px; margin: 0; line-height: 1.6;\"><strong>ESTUDO RECOMENDADO:</strong> $1</p></div></div>')\n        \n        .replace(/\\n/g, '');\n}\n\nconst htmlFinal = `\n<div style=\"background-color: #000000; color: #ffffff; font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; padding: 50px 20px; max-width: 600px; margin: auto;\">\n    <header style=\"text-align: center; margin-bottom: 50px;\">\n        <div style=\"display: inline-block; background: #6200ee; color: #ffffff; padding: 4px 12px; border-radius: 50px; font-size: 9px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px;\">INTELI ACADEMY</div>\n        <h1 style=\"color: #ffffff; font-size: 32px; margin: 0; font-weight: 800; letter-spacing: -1px;\">Intelligence <span style=\"color: #bb86fc;\">Newsletter</span></h1>\n        <div style=\"color: #ffffff; font-size: 10px; margin-top: 15px; opacity: 0.7; letter-spacing: 1px;\">EDIÇÃO #01 • ${dataAtual}</div>\n    </header>\n\n    <main>\n        ${formatarNewsletter(aiOutput)}\n    </main>\n\n    <footer style=\"margin-top: 80px; text-align: center; border-top: 1px solid #1a1a1a; padding-top: 40px;\">\n        <p style=\"color: #6200ee; font-size: 10px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin: 0;\">\n            Curadoria Autônoma de Alta Performance\n        </p>\n    </footer>\n</div>\n`;\n\nreturn [{ json: { corpo_email: htmlFinal } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "25315507-e102-450a-bf83-e2e5c564910f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json[\"Email:\"] }}",
+        "subject": "=🚀 Resumo Semanal - Intelligence Newsletter ({{ $now.format('dd/MM/yyyy') }})",
+        "message": "={{ $json.corpo_email }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1824,
+        0
+      ],
+      "id": "fb6fbe7b-64ed-4d78-8e6d-db50d7d3271c",
+      "name": "Send a message",
+      "webhookId": "a54eb679-a16e-4dc7-9581-72d7202f5102",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fFsmbntVhIc7Ol4L",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "title"
+            },
+            {
+              "fieldToAggregate": "link"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "2397c4c6-f050-4f17-8d02-6dde3341f654",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# PERSONA\nAja como um Editor-Chefe de tecnologia. Seu objetivo é redigir um relatório impecável para a Inteli Academy.\n\n# TAREFA\nRedigir a \"Intelligence Newsletter\" com as 10 notícias abaixo. Use gramática formal e pontuação impecável.\n\n# DIRETRIZES EDITORIAIS\n- Use pontuação perfeita e gramática formal.\n- PROIBIDO: emojis, hashtags (#), asteriscos (*) ou hifens (-) no início das linhas.\n- Escreva de forma fluida, sem fragmentos de frases.\n- Não precisa numerar as notícias.\n- Não precisa de textos introdutórios.\n\n# ESTRUTURA DO CONTEÚDO\nPara cada notícia:\nCATEGORIA: [Nome curto da categoria]\nTITULO: [Título elegante]\nCONTEXTO: [Resumo detalhado e bem pontuado]\nIMPACTO: [Análise de mercado ou técnica]\nFONTE: [URL_ORIGINAL]\n\nNo final:\nANALISE DE TENDENCIAS: [Texto analítico sobre Edge Computing ou Regulação]\nINSIGHT ACADEMY: [Sugestão prática de estudo]\n\n# [DADOS]\n{{ $json.title, $json.link }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "06299306-a35b-4eb0-b6d6-f5f5c2990225",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        272
+      ],
+      "id": "27364e1c-f6d5-41ae-ba7e-d98c0e5ced53",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "JJNZCrCbIJ0kVQoi",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Inteli Academy - Newsletter Generator",
+        "formDescription": "\"Digite seu e-mail para receber o seu relatório em tempo real.\"",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email:",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        16,
+        0
+      ],
+      "id": "7cefe407-edae-4038-a95b-2a3b47c4030f",
+      "name": "On form submission",
+      "webhookId": "4157d0ab-441e-4601-be24-bbba293b1ce0"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "995e3857-7452-4821-87f2-9fb76f93206a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8e7bef1c2d1c931820783ec661956ec3aa19e7002ce22771102787f374c177b9"
+  },
+  "id": "1fPFeg5wNeqisChe",
+  "tags": []
+}
